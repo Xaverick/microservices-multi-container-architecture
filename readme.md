@@ -48,6 +48,75 @@ Each service is **stateless**, so replicas can be added or removed without break
 
 ---
 
+
+## 📐 Architecture Diagrams (Mermaid)
+
+### Logical Architecture
+
+```mermaid
+flowchart TD
+    User[User / Browser]
+
+    User -->|5173| FLB[Frontend Load Balancer]
+
+    FLB --> FE1[Frontend 1]
+    FLB --> FE2[Frontend 2]
+
+    FLB -->|/api| BLB[Backend Load Balancer]
+
+    BLB --> A1[Auth Service 1]
+    BLB --> A2[Auth Service 2]
+
+    BLB --> T1[Task Service 1]
+    BLB --> T2[Task Service 2]
+
+    A1 --> Mongo[(MongoDB)]
+    A2 --> Mongo
+
+    T1 --> Mongo
+    T2 --> Mongo
+
+    T1 --> Redis[(Redis)]
+    T2 --> Redis
+```
+
+---
+
+### Network-Aware Architecture
+
+```mermaid
+flowchart LR
+    subgraph public-net
+        User --> FLB[Frontend LB]
+    end
+
+    subgraph frontend-net
+        FLB --> FE1[Frontend 1]
+        FLB --> FE2[Frontend 2]
+    end
+
+    subgraph backend-net
+        FLB --> BLB[Backend LB]
+    end
+
+    subgraph internal-net
+        BLB --> A1[Auth 1]
+        BLB --> A2[Auth 2]
+        BLB --> T1[Task 1]
+        BLB --> T2[Task 2]
+
+        A1 --> Mongo
+        A2 --> Mongo
+        T1 --> Mongo
+        T2 --> Mongo
+
+        T1 --> Redis
+        T2 --> Redis
+    end
+```
+
+---
+
 ## 🌐 Network Design (Why Multiple Networks?)
 
 Instead of putting everything in one network, I have used **multiple Docker networks intentionally** to simulate real production environments.
@@ -122,74 +191,6 @@ Benefits:
 5. Response flows back to the user
 
 If **any container stops**, traffic is automatically routed to remaining replicas.
-
----
-
-## 📐 Architecture Diagrams (Mermaid)
-
-### Logical Architecture
-
-```mermaid
-flowchart TD
-    User[User / Browser]
-
-    User -->|5173| FLB[Frontend Load Balancer]
-
-    FLB --> FE1[Frontend 1]
-    FLB --> FE2[Frontend 2]
-
-    FLB -->|/api| BLB[Backend Load Balancer]
-
-    BLB --> A1[Auth Service 1]
-    BLB --> A2[Auth Service 2]
-
-    BLB --> T1[Task Service 1]
-    BLB --> T2[Task Service 2]
-
-    A1 --> Mongo[(MongoDB)]
-    A2 --> Mongo
-
-    T1 --> Mongo
-    T2 --> Mongo
-
-    T1 --> Redis[(Redis)]
-    T2 --> Redis
-```
-
----
-
-### Network-Aware Architecture
-
-```mermaid
-flowchart LR
-    subgraph public-net
-        User --> FLB[Frontend LB]
-    end
-
-    subgraph frontend-net
-        FLB --> FE1[Frontend 1]
-        FLB --> FE2[Frontend 2]
-    end
-
-    subgraph backend-net
-        FLB --> BLB[Backend LB]
-    end
-
-    subgraph internal-net
-        BLB --> A1[Auth 1]
-        BLB --> A2[Auth 2]
-        BLB --> T1[Task 1]
-        BLB --> T2[Task 2]
-
-        A1 --> Mongo
-        A2 --> Mongo
-        T1 --> Mongo
-        T2 --> Mongo
-
-        T1 --> Redis
-        T2 --> Redis
-    end
-```
 
 ---
 
