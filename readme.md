@@ -166,6 +166,93 @@ Benefits:
 
 ---
 
+## ▶️ Running the Project
+
+### Basic Startup
+```bash
+docker compose up
+```
+Starts one instance of each service.
+
+---
+
+## 🔁 Running with Multiple Replicas (Scaling)
+
+To simulate real-world load handling and fault tolerance, you can scale services using Docker Compose:
+
+```bash
+docker compose up --scale frontend=2 --scale auth-service=2 --scale task-service=2
+```
+
+### What this command does:
+
+| Service | Replicas |
+|-------|----------|
+| Frontend | 2 |
+| Auth Service | 2 |
+| Task Service | 2 |
+
+- Docker Compose spins up multiple containers per service
+- Nginx load balancers automatically distribute traffic
+- If one container fails, traffic is routed to healthy replicas
+
+> Scaling works because all services are **stateless**.
+
+---
+
+## ⚙️ Environment Configuration (`.env` Files)
+
+This project intentionally separates environment configuration to match real-world microservice systems.
+
+---
+
+### 📌 Root `.env` (Docker Compose Level)
+
+Located at the **project root** and used by `docker-compose.yml`.
+
+Purpose:
+- Shared configuration values
+- Database & Redis connection URLs
+- Infrastructure-level settings
+
+Example:
+```env
+MONGO_DB_URL=mongodb://mongodb:27017/tasks
+REDIS_URL=redis://redis:6379
+PORT=4000
+```
+
+Docker Compose injects these values into containers at runtime.
+
+---
+
+### 📌 Service-Level `.env` Files (Backend)
+
+Each backend service has its **own `.env` file**:
+
+```
+backend/
+ ├── auth-service/
+ │   └── .env
+ └── task-service/
+     └── .env
+```
+
+#### Why separate `.env` files?
+
+Each service is an independent microservice and owns:
+- Its secrets
+- Its runtime configuration
+- Its business logic
+
+This enables:
+- Independent scaling
+- Isolated secrets
+- Cleaner service boundaries
+
+---
+
+
 ## 🔁 End-to-End Request Flow (Example)
 
 ### User Login Request
